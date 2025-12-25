@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free2Play Finder — FreeToGame API</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background texture -->
+  <div class="bg" aria-hidden="true"></div>
+
+  <main class="shell" aria-label="Free2Play Finder App">
+    <!-- LEFT PANEL (like your screenshot) -->
+    <aside class="panel" aria-label="Controls panel">
+      <div class="panel__top">
+        <h1 class="panel__title">Available Games</h1>
+        <p class="panel__desc">
+          Search a free-to-play game and click a card to copy its official URL.
+          Filter by platform, tags, and sorting. Open API docs via the button below.
+        </p>
+      </div>
+
+      <!-- Search -->
+      <div class="control">
+        <label class="label" for="searchInput">Search</label>
+        <div class="searchWrap">
+          <input id="searchInput" class="search" type="text" placeholder="Search by game title" autocomplete="off" />
+          <button id="clearBtn" class="iconBtn" type="button" aria-label="Clear search" title="Clear">
+            ✕
+          </button>
+        </div>
+        <div id="suggestions" class="suggestions" role="listbox" aria-label="Search suggestions"></div>
+      </div>
+
+      <!-- Filters row -->
+      <div class="control">
+        <label class="label">Platform</label>
+        <div class="chips" role="group" aria-label="Platform filters">
+          <button class="chip chip--active" type="button" data-platform="all">All</button>
+          <button class="chip" type="button" data-platform="pc">PC</button>
+          <button class="chip" type="button" data-platform="browser">Browser</button>
+        </div>
+      </div>
+
+      <div class="control">
+        <label class="label" for="tagSelect">Tag / Category</label>
+        <select id="tagSelect" class="select" aria-label="Tag filter">
+          <option value="">Any tag</option>
+        </select>
+        <small class="hint">Tip: choose multiple tags using “Multi-tag mode” below.</small>
+      </div>
+
+      <div class="control">
+        <label class="label" for="sortSelect">Sort</label>
+        <select id="sortSelect" class="select" aria-label="Sort option">
+          <option value="relevance">Relevance</option>
+          <option value="popularity">Popularity</option>
+          <option value="release-date">Release date</option>
+          <option value="alphabetical">Alphabetical</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <div class="toggleRow">
+          <label class="toggle">
+            <input id="multiTagToggle" type="checkbox" />
+            <span class="toggle__ui"></span>
+            <span class="toggle__text">Multi-tag mode (Filter API)</span>
+          </label>
+        </div>
+        <div id="multiTagBox" class="multiTagBox" hidden>
+          <p class="multiTagBox__hint">
+            Pick up to 6 tags. Uses <code>/filter?tag=tag1.tag2...</code>
+          </p>
+          <div id="multiTagPills" class="pills"></div>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="toggleRow">
+          <label class="toggle">
+            <input id="favoritesOnlyToggle" type="checkbox" />
+            <span class="toggle__ui"></span>
+            <span class="toggle__text">Favorites only</span>
+          </label>
+        </div>
+
+        <div class="toggleRow">
+          <label class="toggle">
+            <input id="themeToggle" type="checkbox" />
+            <span class="toggle__ui"></span>
+            <span class="toggle__text">Light mode</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel__buttons">
+        <button id="refreshBtn" class="btn btn--primary" type="button">Fetch Games</button>
+        <button id="apiDocsBtn" class="btn btn--ghost" type="button">API Docs (Rubric)</button>
+      </div>
+
+      <footer class="panel__footer">
+        <span>Data source: FreeToGame API</span>
+        <span class="dot">•</span>
+        <span>Built for API Project Requirements</span>
+      </footer>
+    </aside>
+
+    <!-- RIGHT CONTENT -->
+    <section class="content" aria-label="Results area">
+      <header class="content__top">
+        <div class="status">
+          <div class="status__title">Results</div>
+          <div id="statusLine" class="status__line">Ready.</div>
+        </div>
+
+        <div class="topActions">
+          <button id="loadMoreBtn" class="btn btn--soft" type="button" disabled>Load more</button>
+        </div>
+      </header>
+
+      <!-- Error container -->
+      <div id="errorBox" class="error" role="alert" hidden></div>
+
+      <!-- Loading -->
+      <div id="loadingBox" class="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="loading__text">Loading…</div>
+      </div>
+
+      <!-- Grid -->
+      <div id="grid" class="grid" aria-label="Games grid"></div>
+
+      <!-- Footer (credits) -->
+      <div class="credits">
+        <span>© Free2Play Finder</span>
+        <span class="dot">•</span>
+        <span>API: FreeToGame.com</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Game details modal -->
+  <div id="detailsModal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close="details"></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-label="Game details">
+      <div class="modal__head">
+        <div class="modal__title">Game Details</div>
+        <button class="iconBtn iconBtn--big" type="button" data-close="details" aria-label="Close details">✕</button>
+      </div>
+      <div id="detailsBody" class="modal__body"></div>
+    </div>
+  </div>
+
+  <!-- API docs modal (scrollable markdown-style section) -->
+  <div id="docsModal" class="modal" aria-hidden="true">
+    <div class="modal__backdrop" data-close="docs"></div>
+    <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-label="API documentation">
+      <div class="modal__head">
+        <div class="modal__title">API Documentation (Project Requirement)</div>
+        <button class="iconBtn iconBtn--big" type="button" data-close="docs" aria-label="Close API docs">✕</button>
+      </div>
+      <div class="modal__body md">
+        <h2>FreeToGame API</h2>
+        <p>
+          This project uses the Free-To-Play Games Database API. No API key is required.
+          Base URL and endpoints are taken from the official API docs. :contentReference[oaicite:1]{index=1}
+        </p>
+
+        <h3>1) Base URL</h3>
+        <pre><code>https://www.freetogame.com/api</code></pre>
+
+        <h3>2) Endpoints used (at least 3)</h3>
+        <ul>
+          <li><code>GET /games</code> — list all games</li>
+          <li><code>GET /games?platform=pc|browser|all</code> — platform filtering</li>
+          <li><code>GET /games?category=shooter</code> — tag/category filtering</li>
+          <li><code>GET /games?sort-by=popularity|release-date|alphabetical|relevance</code> — sorting</li>
+          <li><code>GET /filter?tag=3d.mmorpg.fantasy.pvp&amp;platform=pc</code> — multi-tag filtering</li>
+          <li><code>GET /game?id=452</code> — game details by id</li>
+        </ul>
+
+        <h3>3) Required parameters</h3>
+        <ul>
+          <li><code>id</code> (query) — required for <code>/game</code></li>
+          <li><code>platform</code> (query, optional) — <code>pc</code>, <code>browser</code>, or <code>all</code></li>
+          <li><code>category</code> (query, optional) — tag/category such as <code>shooter</code>, <code>mmorpg</code>, etc.</li>
+          <li><code>sort-by</code> (query, optional) — <code>release-date</code>, <code>popularity</code>, <code>alphabetical</code>, <code>relevance</code></li>
+          <li><code>tag</code> (query, optional for <code>/filter</code>) — dot-separated tags like <code>fantasy.pvp.3d</code></li>
+        </ul>
+
+        <h3>4) Authentication</h3>
+        <p><strong>None.</strong> The API requires no keys or accounts. :contentReference[oaicite:2]{index=2}</p>
+
+        <h3>5) Sample JSON response (only fields used in this project)</h3>
+        <pre><code>{
+  "id": 452,
+  "title": "Call Of Duty: Warzone",
+  "thumbnail": "https://www.freetogame.com/g/452/thumbnail.jpg",
+  "short_description": "A free-to-play battle royale ...",
+  "genre": "Shooter",
+  "platform": "Windows",
+  "publisher": "Activision",
+  "developer": "Infinity Ward",
+  "release_date": "2020-03-10",
+  "game_url": "https://www.freetogame.com/open/call-of-duty-warzone"
+}</code></pre>
+
+        <h3>Notes</h3>
+        <ul>
+          <li>Recommended to avoid &gt; 10 requests/second. :contentReference[oaicite:3]{index=3}</li>
+          <li>Project includes: loading UI, validation, error handling, responsive grid, and localStorage favorites.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
