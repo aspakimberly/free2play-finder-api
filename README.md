@@ -81,9 +81,6 @@ Only the fields used in this project are shown below.
   "game_url": "https://www.freetogame.com/open/call-of-duty-warzone"
 }
 
-
----
-
 ## ▶ How to Run the Project
 
 ### Option 1: Using Live Server (Recommended)
@@ -131,5 +128,6 @@ free2play-finder/
 
 
 ---
+
 
 
