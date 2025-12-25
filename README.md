@@ -1,4 +1,3 @@
-```md
 # Free2Play Finder — FreeToGame API (Solo Project)
 
 A responsive, two-panel web application that allows users to browse **free-to-play games** using the **FreeToGame API**.
@@ -146,4 +145,5 @@ free2play-finder/
 * Fully responsive UI for mobile and desktop
 
 ---
+
 
