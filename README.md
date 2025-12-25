@@ -86,12 +86,12 @@ Only the fields used in this project are shown below.
 ### Option 1: Using Live Server (Recommended)
 
 1. Open the project folder in **VS Code**
-2. Install **Live Server** extension
+2. Install the **Live Server** extension
 3. Right-click `index.html`
-4. Click **“Open with Live Server”**
+4. Click **Open with Live Server**
 
-> ⚠️ Important: Do **NOT** open using `file://`
-> Fetch requests may fail due to CORS restrictions.
+⚠️ **Important:** Do **NOT** open using `file://`  
+Fetch requests may fail due to CORS restrictions.
 
 ---
 
@@ -128,6 +128,7 @@ free2play-finder/
 
 
 ---
+
 
 
 
